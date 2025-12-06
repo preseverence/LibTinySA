@@ -58,8 +58,6 @@ namespace LibTinySA.Windows
 
         bytesToRead = serialPort.Read(receiveBuffer, 0, bytesToRead);
 
-        //Console.WriteLine(">>" + Encoding.ASCII.GetString(receiveBuffer, 0, bytesToRead));
-
         Receiver?.OnDataReceived(receiveBuffer, bytesToRead);
       }
     }

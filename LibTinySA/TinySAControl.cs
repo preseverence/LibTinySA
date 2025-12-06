@@ -115,8 +115,6 @@ namespace LibTinySA
       TaskCompletionSource<string> tcs;
       if (PeekWaitCommand(token, out tcs))
       {
-        Console.WriteLine(">>" + raw);
-
         string content = block.GetAsString(encoding, DELIMITER.Length);
         if (content == token + "?")
           tcs.SetException(new TinySAException($"Command not recognized by the device: {token}"));
@@ -135,8 +133,6 @@ namespace LibTinySA
         ushort y = block.ReadUShort();
         ushort width = block.ReadUShort();
         ushort height = block.ReadUShort();
-
-        Console.WriteLine($"BULK x: {x}; y: {y}; w: {width}; height: {height}; size: {block.Length}");
         
         UpdateImage(x, y, width, height, ref block);
         return;
@@ -154,8 +150,6 @@ namespace LibTinySA
 
         return;
       }
-
-      Console.WriteLine(token + " " +  block.GetAsString(encoding));
     }
 
     private int imageWidth = -1;
@@ -171,7 +165,6 @@ namespace LibTinySA
       if (image == null && imageWidth > 0 && imageHeight > 0)
       {
         image = new ushort[imageHeight, imageWidth];
-        Console.WriteLine($"Finished collection image dimensions: {imageWidth}x{imageHeight}");
       }
       else
       {
