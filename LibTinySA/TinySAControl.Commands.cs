@@ -1,23 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Globalization;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace LibTinySA
 {
-  public partial class TinySAControl: INotifyPropertyChanged
+  public partial class TinySAControl
   {
-    private float batteryVoltage;
-    private int zeroReference;
-    private bool? spur;
-    private float rbw;
-    private float minRbw = 3;
-    private float maxRbw = 600;
-    private bool? lna;
-
     #region LNA
 
     /// <summary>
@@ -38,17 +27,7 @@ namespace LibTinySA
     /// </summary>
     /// <remarks>The API does not allow to get it, so the value will be revealed upon setting.</remarks>
     /// <seealso cref="SetLNA"/>
-    public bool? LNA
-    {
-      get { return lna; }
-      private set
-      {
-        if (value == lna)
-          return;
-        lna = value;
-        OnPropertyChanged();
-      }
-    }
+    public bool? LNA { get; private set; }
 
     #endregion
 
@@ -93,49 +72,19 @@ namespace LibTinySA
     /// Gets the RBW value, kHz.
     /// </summary>
     /// <seealso cref="SetRBW"/>
-    public float RBW
-    {
-      get { return rbw; }
-      private set
-      {
-        if (value.Equals(rbw))
-          return;
-        rbw = value;
-        OnPropertyChanged();
-      }
-    }
+    public float RBW { get; private set; }
 
     /// <summary>
     /// Gets the minimum RBW value, kHz.
     /// </summary>
     /// <seealso cref="SetRBW"/>
-    public float MinRBW
-    {
-      get { return minRbw; }
-      private set
-      {
-        if (value.Equals(minRbw))
-          return;
-        minRbw = value;
-        OnPropertyChanged();
-      }
-    }
+    public float MinRBW { get; private set; } = 3;
 
     /// <summary>
     /// Gets the maximum RBW value, kHz.
     /// </summary>
     /// <seealso cref="SetRBW"/>
-    public float MaxRBW
-    {
-      get { return maxRbw; }
-      private set
-      {
-        if (value.Equals(maxRbw))
-          return;
-        maxRbw = value;
-        OnPropertyChanged();
-      }
-    }
+    public float MaxRBW { get; private set; } = 600;
 
     #endregion
 
@@ -146,17 +95,7 @@ namespace LibTinySA
     /// </summary>
     /// <remarks>The API does not allow to get it, so the value will be revealed upon setting.</remarks>
     /// <seealso cref="SetSpur"/>
-    public bool? Spur
-    {
-      get { return spur; }
-      private set
-      {
-        if (value == spur)
-          return;
-        spur = value;
-        OnPropertyChanged();
-      }
-    }
+    public bool? Spur { get; private set; }
 
     /// <summary>
     /// Sets the SPUR value.
@@ -184,28 +123,19 @@ namespace LibTinySA
     /// Gets the zero reference level, dBm.
     /// </summary>
     /// <seealso cref="SetZeroReference"/>
-    public int ZeroReference
-    {
-      get { return zeroReference; }
-      private set
-      {
-        if (value == zeroReference)
-          return;
-        zeroReference = value;
-        OnPropertyChanged();
-      }
-    }
+    public int ZeroReference { get; private set; }
 
-    private async Task UpdateZeroReference()
+    private async Task<int> UpdateZeroReference()
     {
       string content = await SendCommand("zero", "zero\r\n");
 
       Match match = REGEX_ZERO.Match(content);
 
       if (!match.Success)
-        return;
+        return -1;
 
       ZeroReference = int.Parse(match.Groups[1].Value);
+      return ZeroReference;
     }
 
     /// <summary>
@@ -228,17 +158,7 @@ namespace LibTinySA
     /// Get the battery voltage, V.
     /// </summary>
     /// <seealso cref="UpdateBatteryVoltage"/>
-    public float BatteryVoltage
-    {
-      get { return batteryVoltage; }
-      private set
-      {
-        if (value.Equals(batteryVoltage))
-          return;
-        batteryVoltage = value;
-        OnPropertyChanged();
-      }
-    }
+    public float BatteryVoltage { get; private set; }
 
     /// <summary>
     /// Updates the battery voltage from the device.
@@ -488,22 +408,6 @@ namespace LibTinySA
 
       Status = TinySAStatus.Paused;
       return result;
-    }
-
-    public event PropertyChangedEventHandler PropertyChanged;
-
-    protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-    {
-      PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
-    {
-      if (EqualityComparer<T>.Default.Equals(field, value))
-        return false;
-      field = value;
-      OnPropertyChanged(propertyName);
-      return true;
     }
   }
 

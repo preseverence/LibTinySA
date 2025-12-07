@@ -18,5 +18,10 @@
     /// Opens the COM connection.
     /// </summary>
     void Open();
+
+    /// <summary>
+    /// Closes the COM connection.
+    /// </summary>
+    void Close();
   }
 }

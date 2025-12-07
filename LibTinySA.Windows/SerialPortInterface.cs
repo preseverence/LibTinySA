@@ -19,6 +19,8 @@ namespace LibTinySA.Windows
     {
       if (string.IsNullOrWhiteSpace(PortName))
         throw new InvalidOperationException("PortName must be set before opening");
+      if (serialPort != null)
+        return;
 
       serialPort = new SerialPort();
       serialPort.PortName = PortName;
@@ -27,6 +29,7 @@ namespace LibTinySA.Windows
       serialPort.WriteTimeout = 500;
       serialPort.DataReceived += SerialPort_DataReceived;
       serialPort.ReadBufferSize = BUFFER_SIZE;
+      serialPort.ErrorReceived += SerialPort_ErrorReceived;
 
       serialPort.Open();
 
@@ -67,11 +70,19 @@ namespace LibTinySA.Windows
       Receive();
     }
 
+    private void SerialPort_ErrorReceived(object sender, SerialErrorReceivedEventArgs e)
+    {
+      if (ErrorReceived != null)
+        ErrorReceived(e.EventType);
+    }
+
     public void SendData(byte[] buffer, int length)
     {
       serialPort.Write(buffer, 0, length);
     }
 
     public IComReceiver Receiver { get; set; }
+
+    public event Action<SerialError> ErrorReceived;
   }
 }

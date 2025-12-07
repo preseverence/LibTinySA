@@ -36,6 +36,11 @@ namespace LibTinySA
       await UpdateSweep();
     }
 
+    public void Close()
+    {
+      Sender.Close();
+    }
+
     private void AddWaitCommand(string command, TaskCompletionSource<string> tcs)
     {
       bool lockTaken = false;
@@ -106,8 +111,6 @@ namespace LibTinySA
 
     private void HandleResponse(BufferBlock block)
     {
-      string raw = block.GetAsString(encoding);
-
       string token = block.GetToken(encoding);
       if (token == null)
         return;
@@ -139,11 +142,13 @@ namespace LibTinySA
       }
       if (token == "fill")
       {
+        // ReSharper disable UnusedVariable
         ushort x = block.ReadUShort();
         ushort y = block.ReadUShort();
         ushort width = block.ReadUShort();
         ushort height = block.ReadUShort();
         ushort color = block.ReadUShort();
+        // ReSharper restore UnusedVariable
 
         UpdateFill(color, x, width);
         FinishImage();
