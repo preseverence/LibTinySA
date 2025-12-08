@@ -47,6 +47,8 @@ namespace LibTinySA.Tests
 
     public void Open() { }
 
+    public void Close() { }
+
     public void AssertNoCommands()
     {
       Assert.IsTrue(expectedSends.Count == 0, "No more commands expected");

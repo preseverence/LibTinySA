@@ -387,13 +387,13 @@ namespace LibTinySA
     /// <param name="points">Points count.</param>
     /// <returns>Task which completes when the operation completes.</returns>
     /// <remarks>Using this pauses the automatic scanning if any. <see cref="ScanningProgress"/> notifications will not appear.</remarks>
-    public async Task<Marker[]> Scan(ulong start, ulong stop, int points)
+    public async Task<ScanPoint[]> Scan(ulong start, ulong stop, int points)
     {
       string content = await SendCommand($"scan {start} {stop} {points} 3", $"scan {start} {stop} {points} 3\r\n");
 
       string[] lines = content.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
 
-      Marker[] result = new Marker[lines.Length];
+      ScanPoint[] result = new ScanPoint[lines.Length];
       for (int i = 0; i < lines.Length; i++)
       {
         string line = lines[i];
@@ -403,7 +403,7 @@ namespace LibTinySA
         ulong freq = ulong.Parse(values[0]);
         double power = values[1].IndexOf(':') != -1 ? -10d : double.Parse(values[1], CultureInfo.InvariantCulture);
 
-        result[i] = new Marker(freq, power);
+        result[i] = new ScanPoint(freq, power);
       }
 
       Status = TinySAStatus.Paused;
@@ -417,22 +417,5 @@ namespace LibTinySA
     Undefined = -1,
     Resumed,
     Paused,
-  }
-
-  public struct Marker
-  {
-    internal Marker(ulong frequency, double power)
-    {
-      Frequency = frequency;
-      Power = power;
-    }
-
-    public ulong Frequency { get; }
-    public double Power { get; }
-
-    public override string ToString()
-    {
-      return $"{Frequency/1000} kHz, {Power} dBm";
-    }
   }
 }
