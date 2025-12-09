@@ -54,9 +54,9 @@
       return 0f;
     }
 
-    public static string ToVoltageString(this float voltage)
+    public static string ToVoltageString(this float voltage, string format = "P0")
     {
-      return $"{VoltageToLevel(voltage):P1} V";
+      return VoltageToLevel(voltage).ToString(format);
     }
   }
 }
