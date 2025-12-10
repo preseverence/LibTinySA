@@ -387,7 +387,7 @@ namespace LibTinySA
     /// <param name="points">Points count.</param>
     /// <returns>Task which completes when the operation completes.</returns>
     /// <remarks>Using this pauses the automatic scanning if any. <see cref="ScanningProgress"/> notifications will not appear.</remarks>
-    public async Task<ScanPoint[]> Scan(ulong start, ulong stop, int points)
+    public async Task<ScanPoint[]> Scan(ulong start, ulong stop, ushort points)
     {
       string content = await SendCommand($"scan {start} {stop} {points} 3", $"scan {start} {stop} {points} 3\r\n");
 

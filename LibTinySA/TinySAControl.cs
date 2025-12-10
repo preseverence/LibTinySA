@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LibTinySA
 {
-  public partial class TinySAControl: IComReceiver
+  public partial class TinySAControl: IDeviceControl
   {
     private readonly Encoding encoding = Encoding.ASCII;
     private readonly Dictionary<string, TaskCompletionSource<string>> waitCommands = new Dictionary<string, TaskCompletionSource<string>>();
