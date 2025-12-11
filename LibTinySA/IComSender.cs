@@ -1,4 +1,6 @@
-﻿namespace LibTinySA
+﻿using System;
+
+namespace LibTinySA
 {
   public interface IComSender
   {
@@ -23,5 +25,10 @@
     /// Closes the COM connection.
     /// </summary>
     void Close();
+
+    /// <summary>
+    /// Raised when the active connection is closed. Does not raise during <see cref="Close"/> call.
+    /// </summary>
+    event Action Closed;
   }
 }

@@ -56,7 +56,8 @@ namespace LibTinySA
       try
       {
         commandsLock.Enter(ref lockTaken);
-        waitCommands.Add(command, tcs);
+        if (!waitCommands.ContainsKey(command))
+          waitCommands.Add(command, tcs);
       }
       finally
       {

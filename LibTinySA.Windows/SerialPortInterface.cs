@@ -85,12 +85,33 @@ namespace LibTinySA.Windows
       if (DebugDataSent != null)
         DebugDataSent(Encoding.ASCII.GetString(buffer, 0, length));
 
-      serialPort.Write(buffer, 0, length);
+      if (!serialPort.IsOpen)
+      {
+        FireClosed();
+        return;
+      }
+
+      try
+      {
+        serialPort.Write(buffer, 0, length);
+      }
+      catch (InvalidOperationException)
+      {
+        if (!serialPort.IsOpen)
+          FireClosed();
+      }
+    }
+
+    private void FireClosed()
+    {
+      if (Closed != null)
+        Closed();
     }
 
     public IComReceiver Receiver { get; set; }
 
     public event Action<SerialError> ErrorReceived;
+    public event Action Closed; 
 
     public event Action<string> DebugDataReceived;
     public event Action<string> DebugDataSent;
