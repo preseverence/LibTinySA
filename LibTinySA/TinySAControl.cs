@@ -27,14 +27,23 @@ namespace LibTinySA
       Sender.Receiver = this;
       Sender.Open();
 
-      Version = await SendCommand("version", "version\r\n");
-      Info = await SendCommand("info", "info\r\n");
+      await SetAutoRefresh(false);
+      Version = await SendCommand("version");
+      Info = await SendCommand("info");
+
+      IsUltra = Info.Contains("ULTRA");
+
       await UpdateStatus();
       await UpdateRBW();
       await UpdateZeroReference();
       await UpdateBatteryVoltage();
       await UpdateSweep();
     }
+
+    /// <summary>
+    /// Gets the value indicating whether the device is TinySA Ultra or TinySA Basic.
+    /// </summary>
+    public bool IsUltra { get; private set; }
 
     public void Close()
     {
@@ -76,13 +85,13 @@ namespace LibTinySA
       }
     }
 
-    private Task<string> SendCommand(string command, string message)
+    private Task<string> SendCommand(string command)
     {
       TaskCompletionSource<string> tcs = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
 
       AddWaitCommand(command, tcs);
 
-      byte[] bytes = encoding.GetBytes(message);
+      byte[] bytes = encoding.GetBytes(command + "\r\n");
       Sender.SendData(bytes, bytes.Length);
 
       return tcs.Task;
@@ -166,35 +175,30 @@ namespace LibTinySA
 
     private void FinishImage()
     {
-      // do we collected the image dimensions?
-      if (image == null && imageWidth > 0 && imageHeight > 0)
-      {
-        image = new ushort[imageHeight, imageWidth];
-      }
-      else
-      {
-        if (!isImageDirty)
-          return;
+      if (!isImageDirty)
+        return;
 
-        if (ImageAcquired != null)
-          Task.Run(() => ImageAcquired(image, imageWidth, imageHeight));
-        isImageDirty = false;
-      }
+      if (ImageAcquired != null)
+        Task.Run(() => ImageAcquired(image, imageWidth, imageHeight));
+      isImageDirty = false;
     }
 
     private void UpdateImage(ushort x, ushort y, ushort width, ushort height, ref BufferBlock block)
     {
       if (image == null)
       {
-        // collect image dimensions statistics
-        int w = x + width;
-        int h = y + height;
-        if (imageWidth < w)
-          imageWidth = w;
-        if (imageHeight < h)
-          imageHeight = h;
+        if (IsUltra)
+        {
+          imageWidth = 480;
+          imageHeight = 320;
+        }
+        else
+        {
+          imageWidth = 320;
+          imageHeight = 240;
+        }
 
-        return;
+        image = new ushort[imageHeight, imageWidth];
       }
 
       // read the data to the image buffer

@@ -84,13 +84,34 @@ namespace LibTinySA.Windows
     /// </summary>
     /// <param name="bmp">Existing bitmap created by <see cref="BuildWPFImage"/>.</param>
     /// <param name="img">Pixels array.</param>
-    public static void UpateWPFImage(WriteableBitmap bmp, ushort[,] img)
+    public static unsafe void UpateWPFImage(WriteableBitmap bmp, ushort[,] img)
     {
       int width = bmp.PixelWidth;
       int height = bmp.PixelHeight;
 
+      byte[] buffer = new byte[width * height * 2];
+
+      fixed (ushort* imgPtr = img)
+      {
+        byte* bytePtr = (byte*)imgPtr;
+        fixed (byte* bufferPtr = buffer)
+        {
+          byte* bPtr = bufferPtr;
+          for (int i = 0; i < width * height; i++)
+          {
+            byte b = *bytePtr;
+            bytePtr++;
+            *bPtr = *bytePtr;
+            bytePtr++;
+            bPtr++;
+            *bPtr = b;
+            bPtr++;
+          }
+        }
+      }
+
       bmp.Lock();
-      bmp.WritePixels(new System.Windows.Int32Rect(0, 0, width, height), img, width * 2, 0);
+      bmp.WritePixels(new System.Windows.Int32Rect(0, 0, width, height), buffer, width * 2, 0);
       bmp.Unlock();
     }
   }

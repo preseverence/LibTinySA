@@ -19,7 +19,7 @@ namespace LibTinySA
     public Task SetLNA(bool value)
     {
       LNA = value;
-      return SendCommand("lna", value ? "lna on\r\n" : "lna off\r\n");
+      return SendCommand(value ? "lna on" : "lna off");
     }
 
     /// <summary>
@@ -45,19 +45,22 @@ namespace LibTinySA
     /// <returns>Task which finishes whtn the value is set.</returns>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when the value is out of range.</exception>
     /// <seealso cref="RBW"/>
-    public Task SetRBW(float value = -1)
+    public async Task SetRBW(float value = -1)
     {
       if (value > 0 && (value < MinRBW || value > MaxRBW))
         throw new ArgumentOutOfRangeException(nameof(value),
           "Invalid RBW value. Must be either within (MinRBW; MaxRBW) or <0 for auto");
 
-      return SendCommand("rbw",
-        value < 0 ? "rbw auto\r\n" : $"rbw {value.ToString(CultureInfo.InvariantCulture)}\r\n");
+      await SendCommand(
+          value < 0 ? "rbw auto\r\n" : $"rbw {value.ToString(CultureInfo.InvariantCulture)}"
+        );
+
+      await UpdateRBW();
     }
 
     private async Task UpdateRBW()
     {
-      string content = await SendCommand("rbw", "rbw\r\n");
+      string content = await SendCommand("rbw");
       Match match = REGEX_RBW.Match(content);
 
       if (!match.Success)
@@ -107,7 +110,7 @@ namespace LibTinySA
     {
       Spur = value;
 
-      return SendCommand("spur", value ? "spur on\r\n" : "spur off\r\n");
+      return SendCommand(value ? "spur on" : "spur off");
     }
 
     #endregion
@@ -125,17 +128,13 @@ namespace LibTinySA
     /// <seealso cref="SetZeroReference"/>
     public int ZeroReference { get; private set; }
 
-    private async Task<int> UpdateZeroReference()
+    private async Task UpdateZeroReference()
     {
-      string content = await SendCommand("zero", "zero\r\n");
+      string content = await SendCommand("zero");
 
       Match match = REGEX_ZERO.Match(content);
-
-      if (!match.Success)
-        return -1;
-
+      
       ZeroReference = int.Parse(match.Groups[1].Value);
-      return ZeroReference;
     }
 
     /// <summary>
@@ -147,7 +146,7 @@ namespace LibTinySA
     public Task SetZeroReference(int value)
     {
       ZeroReference = value;
-      return SendCommand("zero", $"zero {value}\r\n");
+      return SendCommand($"zero {value}");
     }
 
     #endregion
@@ -167,7 +166,7 @@ namespace LibTinySA
     /// <seealso cref="BatteryVoltage"/>
     public async Task<float> UpdateBatteryVoltage()
     {
-      string content = await SendCommand("vbat", "vbat\r\n");
+      string content = await SendCommand("vbat");
       int index = content.IndexOf(' ');
       if (index == -1)
         return 0;
@@ -191,7 +190,7 @@ namespace LibTinySA
     /// <returns>Task which finishes when the data arrives.</returns>
     public async Task<Marker[]> UpdateMarkers()
     {
-      string content = await SendCommand("marker", "marker\r\n");
+      string content = await SendCommand("marker");
 
       string[] values = content.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -223,7 +222,7 @@ namespace LibTinySA
       if (number < 0 || number > 4)
         throw new ArgumentOutOfRangeException(nameof(number));
 
-      return SendCommand("load", $"load {number}\r\n");
+      return SendCommand($"load {number}");
     }
 
     /// <summary>
@@ -237,7 +236,7 @@ namespace LibTinySA
       if (number < 0 || number > 4)
         throw new ArgumentOutOfRangeException(nameof(number));
 
-      return SendCommand("save", $"save {number}\r\n");
+      return SendCommand($"save {number}");
     }
 
     #endregion
@@ -252,7 +251,7 @@ namespace LibTinySA
 
     private async Task UpdateStatus()
     {
-      string value = await SendCommand("status", "status\r\n");
+      string value = await SendCommand("status");
       TinySAStatus s;
       Status = Enum.TryParse(value, true, out s) ? s : TinySAStatus.Invalid;
     }
@@ -268,12 +267,12 @@ namespace LibTinySA
       if (value)
       {
         Status = TinySAStatus.Resumed;
-        return SendCommand("resume", "resume\r\n");
+        return SendCommand("resume");
       }
       else
       {
         Status = TinySAStatus.Paused;
-        return SendCommand("pause", "pause\r\n");
+        return SendCommand("pause");
       }
     }
 
@@ -301,7 +300,7 @@ namespace LibTinySA
 
     private async Task UpdateSweep()
     {
-      string content = await SendCommand("sweep", "sweep\r\n");
+      string content = await SendCommand("sweep");
 
       string[] values = content.Split(' ');
       SweepStart = ulong.Parse(values[0]);
@@ -311,7 +310,7 @@ namespace LibTinySA
 
     public async Task SetSweep(ulong start, ulong stop, ushort points)
     {
-      await SendCommand($"sweep {start} {stop} {points}", $"sweep {start} {stop} {points}\r\n");
+      await SendCommand($"sweep {start} {stop} {points}");
 
       // call this one more time to see real values set by the device
       await UpdateSweep();
@@ -369,6 +368,26 @@ namespace LibTinySA
     /// </summary>
     public string Info { get; private set; }
 
+    private static readonly Regex REGEX_BAUD = new Regex(
+      @"Serial: (\d+) baud",
+      RegexOptions.ECMAScript
+    );
+
+    /// <summary>
+    /// Gets the current baud rate.
+    /// </summary>
+    /// <returns>Task which completes when the value is get.</returns>
+    public async Task<int> GetBaudRate()
+    {
+      string content = await SendCommand("usart_cfg");
+
+      Match match = REGEX_BAUD.Match(content);
+      if (!match.Success)
+        return -1;
+
+      return int.Parse(match.Groups[1].Value);
+    }
+
     /// <summary>
     /// Enables or disables autorefresh - automatic dumps of screen during scanning.
     /// </summary>
@@ -376,7 +395,7 @@ namespace LibTinySA
     /// <returns>Task which completes when the operation completes.</returns>
     public Task SetAutoRefresh(bool value)
     {
-      return SendCommand("refresh", value ? "refresh on\r\n" : "refresh off\r\n");
+      return SendCommand(value ? "refresh on" : "refresh off");
     }
 
     /// <summary>
@@ -389,7 +408,11 @@ namespace LibTinySA
     /// <remarks>Using this pauses the automatic scanning if any. <see cref="ScanningProgress"/> notifications will not appear.</remarks>
     public async Task<ScanPoint[]> Scan(ulong start, ulong stop, ushort points)
     {
-      string content = await SendCommand($"scan {start} {stop} {points} 3", $"scan {start} {stop} {points} 3\r\n");
+      ushort maxPoints = (ushort)(IsUltra ? 450 : 290);
+      if (points > maxPoints)
+        points = maxPoints;
+
+      string content = await SendCommand($"scan {start} {stop} {points} 3");
 
       string[] lines = content.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
 

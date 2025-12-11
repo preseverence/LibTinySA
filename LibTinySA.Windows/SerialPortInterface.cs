@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO.Ports;
+using System.Text;
 
 namespace LibTinySA.Windows
 {
@@ -61,6 +62,9 @@ namespace LibTinySA.Windows
 
         bytesToRead = serialPort.Read(receiveBuffer, 0, bytesToRead);
 
+        if (DebugDataReceived != null)
+          DebugDataReceived(Encoding.ASCII.GetString(receiveBuffer, 0, bytesToRead));
+
         Receiver?.OnDataReceived(receiveBuffer, bytesToRead);
       }
     }
@@ -78,11 +82,17 @@ namespace LibTinySA.Windows
 
     public void SendData(byte[] buffer, int length)
     {
+      if (DebugDataSent != null)
+        DebugDataSent(Encoding.ASCII.GetString(buffer, 0, length));
+
       serialPort.Write(buffer, 0, length);
     }
 
     public IComReceiver Receiver { get; set; }
 
     public event Action<SerialError> ErrorReceived;
+
+    public event Action<string> DebugDataReceived;
+    public event Action<string> DebugDataSent;
   }
 }

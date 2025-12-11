@@ -199,5 +199,18 @@ namespace LibTinySA
     /// <returns>Task which completes when the operation completes.</returns>
     /// <remarks>Using this pauses the automatic scanning if any. <see cref="TinySAControl.ScanningProgress"/> notifications will not appear.</remarks>
     Task<ScanPoint[]> Scan(ulong start, ulong stop, ushort points);
+
+    /// <summary>
+    /// Enables or disables autorefresh - automatic dumps of screen during scanning.
+    /// </summary>
+    /// <param name="value"><c>true</c> to enable and <c>false</c> to disable.</param>
+    /// <returns>Task which completes when the operation completes.</returns>
+    Task SetAutoRefresh(bool value);
+
+    /// <summary>
+    /// Gets the current baud rate.
+    /// </summary>
+    /// <returns>Task which completes when the value is get.</returns>
+    Task<int> GetBaudRate();
   }
 }
