@@ -162,7 +162,6 @@ namespace LibTinySA
 
         UpdateFill(color, x, width);
         FinishImage();
-
         return;
       }
     }

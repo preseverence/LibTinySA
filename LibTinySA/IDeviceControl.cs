@@ -116,7 +116,7 @@ namespace LibTinySA
     /// <summary>
     /// Gets the TinySA autosweep status.
     /// </summary>
-    /// <seealso cref="SetStatus"/>
+    /// <seealso cref="SetActive"/>
     TinySAStatus Status { get; }
 
     /// <summary>
@@ -183,7 +183,7 @@ namespace LibTinySA
     /// <param name="value"><c>true</c> to enable and <c>false</c> to disable.</param>
     /// <seealso cref="TinySAControl.Status"/>
     /// <returns>Task which completes when the operation completes.</returns>
-    Task SetStatus(bool value);
+    Task SetActive(bool value);
 
     /// <summary>
     /// Raised when scanning progress update has been received. The param is normalized (0..1) progress value.

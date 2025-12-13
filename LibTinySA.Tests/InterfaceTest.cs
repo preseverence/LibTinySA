@@ -54,6 +54,7 @@ namespace LibTinySA.Tests
       i.PushExpectation("zero 1\r\n", "zero 1\r\nch> ");
       i.PushExpectation("sweep 900000000 1500000000 290\r\n", "sweep 900000000 1500000000 290\r\nch> ");
       i.PushExpectation("sweep\r\n", "sweep\r\n900000000 1400000000 290\r\nch> ");
+      i.PushExpectation("marker\r\n", "marker\r\n0 0 819000000 -100\r\n1 0 829000000 -110\r\n2 0 835000000 -150\r\nch> ");
 
       await control.LoadSlot(0);
       await control.SaveSlot(2);
@@ -71,9 +72,9 @@ namespace LibTinySA.Tests
       Assert.AreEqual(true, control.Spur);
       await control.SetSpur(false);
       Assert.AreEqual(false, control.Spur);
-      await control.SetStatus(true);
+      await control.SetActive(true);
       Assert.AreEqual(TinySAStatus.Resumed, control.Status);
-      await control.SetStatus(false);
+      await control.SetActive(false);
       Assert.AreEqual(TinySAStatus.Paused, control.Status);
       await control.SetZeroReference(1);
       Assert.AreEqual(1, control.ZeroReference);
@@ -81,6 +82,16 @@ namespace LibTinySA.Tests
       Assert.AreEqual(900000000, control.SweepStart);
       Assert.AreEqual(1400000000, control.SweepStop);
       Assert.AreEqual(290, control.SweepPoints);
+
+      Marker[] markers = await control.UpdateMarkers();
+      Assert.AreEqual(3, markers.Length);
+      Assert.AreEqual(-100, markers[0].Power);
+      Assert.AreEqual(819000000, markers[0].Frequency);
+      Assert.AreEqual(-110, markers[1].Power);
+      Assert.AreEqual(829000000, markers[1].Frequency);
+      Assert.AreEqual(-150, markers[2].Power);
+      Assert.AreEqual(835000000, markers[2].Frequency);
+
       i.AssertNoCommands();
     }
 

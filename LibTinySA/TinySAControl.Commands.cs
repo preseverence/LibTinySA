@@ -246,7 +246,7 @@ namespace LibTinySA
     /// <summary>
     /// Gets the TinySA autosweep status.
     /// </summary>
-    /// <seealso cref="SetStatus"/>
+    /// <seealso cref="SetActive"/>
     public TinySAStatus Status { get; private set; }
 
     private async Task UpdateStatus()
@@ -257,12 +257,12 @@ namespace LibTinySA
     }
 
     /// <summary>
-    /// Sets the autorefresh status of the device.
+    /// Sets the activity (autoscanning) status of the device.
     /// </summary>
     /// <param name="value"><c>true</c> to enable and <c>false</c> to disable.</param>
     /// <seealso cref="Status"/>
     /// <returns>Task which completes when the operation completes.</returns>
-    public Task SetStatus(bool value)
+    public Task SetActive(bool value)
     {
       if (value)
       {
@@ -389,7 +389,7 @@ namespace LibTinySA
     }
 
     /// <summary>
-    /// Enables or disables autorefresh - automatic dumps of screen during scanning.
+    /// Enables or disables autorefresh - automatic dumps of screen.
     /// </summary>
     /// <param name="value"><c>true</c> to enable and <c>false</c> to disable.</param>
     /// <returns>Task which completes when the operation completes.</returns>
