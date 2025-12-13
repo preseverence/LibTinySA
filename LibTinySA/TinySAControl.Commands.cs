@@ -52,7 +52,7 @@ namespace LibTinySA
           "Invalid RBW value. Must be either within (MinRBW; MaxRBW) or <0 for auto");
 
       await SendCommand(
-          value < 0 ? "rbw auto\r\n" : $"rbw {value.ToString(CultureInfo.InvariantCulture)}"
+          value < 0 ? "rbw auto" : $"rbw {value.ToString(CultureInfo.InvariantCulture)}"
         );
 
       await UpdateRBW();

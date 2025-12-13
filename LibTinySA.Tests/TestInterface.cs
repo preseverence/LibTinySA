@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,25 +21,19 @@ namespace LibTinySA.Tests
       PushExpectation(new ExpectedCommand(command, response));
     }
 
-    public void Receive(byte[] response)
-    {
-      Receiver.OnDataReceived(response, response.Length);
-    }
-
-    public void Receive(string response)
-    {
-      Receive(Encoding.ASCII.GetBytes(response));
-    }
-
     public void SendData(byte[] buffer, int length)
     {
       Assert.IsTrue(expectedSends.Count > 0, "No more commands expected");
 
       string command = Encoding.ASCII.GetString(buffer, 0, length);
 
+      Console.WriteLine($">> {command}");
+
       ExpectedCommand ex = expectedSends.Dequeue();
 
       Assert.AreEqual(ex.Command, command, "Command expectation");
+
+      Console.WriteLine($"<< {Encoding.ASCII.GetString(ex.Response, 0, ex.Response.Length)}");
 
       Task.Run(() => Receiver.OnDataReceived(ex.Response, ex.Response.Length));
     }
@@ -48,6 +43,8 @@ namespace LibTinySA.Tests
     public void Open() { }
 
     public void Close() { }
+
+    public event Action Closed;
 
     public void AssertNoCommands()
     {
