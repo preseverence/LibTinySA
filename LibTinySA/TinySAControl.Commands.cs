@@ -358,6 +358,57 @@ namespace LibTinySA
 
     #endregion
 
+    #region Sweeptime
+
+    private static readonly Regex REGEX_SWEEPTIME = new Regex(
+      @"usage: sweeptime (.+)\.\.(.+)\r\n([\d\.]+)s",
+      RegexOptions.ECMAScript | RegexOptions.Multiline
+    );
+
+    /// <summary>
+    /// Gets the minimum sweep time, seconds.
+    /// </summary>
+    public float MinSweepTime { get; private set; }
+
+    /// <summary>
+    /// Gets the maximum sweep time, seconds.
+    /// </summary>
+    public float MaxSweepTime { get; private set; }
+
+    /// <summary>
+    /// Gets the current sweep time, seconds.
+    /// </summary>
+    /// <seealso cref="SetSweepTime"/>
+    public float SweepTime { get; private set; }
+
+    private async Task UpdateSweepTime()
+    {
+      string content = await SendCommand("sweeptime");
+      Match match = REGEX_SWEEPTIME.Match(content);
+
+      if (!match.Success)
+        return;
+
+      MinSweepTime = float.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
+      MaxSweepTime = float.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture);
+      SweepTime = float.Parse(match.Groups[3].Value, CultureInfo.InvariantCulture);
+    }
+
+    /// <summary>
+    /// Sets the sweep time value.
+    /// </summary>
+    /// <param name="value">Sweep time value to set, seconds.</param>
+    /// <returns>Task which completes when the value is set.</returns>
+    /// <remarks>Consider checking <see cref="SweepTime"/> after setting as the device may set different value than provided.</remarks>
+    public async Task SetSweepTime(float value)
+    {
+      await SendCommand($"sweeptime {value.ToString(CultureInfo.InvariantCulture)}");
+
+      await UpdateSweepTime();
+    }
+
+    #endregion
+
     /// <summary>
     /// Gets the TinySA device version.
     /// </summary>

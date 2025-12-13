@@ -38,6 +38,7 @@ namespace LibTinySA
       await UpdateZeroReference();
       await UpdateBatteryVoltage();
       await UpdateSweep();
+      await UpdateSweepTime();
     }
 
     /// <summary>

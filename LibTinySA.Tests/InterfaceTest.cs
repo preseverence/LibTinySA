@@ -19,6 +19,7 @@ namespace LibTinySA.Tests
       i.PushExpectation("zero\r\n", "zero\r\nusage: zero {level}\r\n25dBm\r\nch> ");
       i.PushExpectation("vbat\r\n", "vbat\r\n4251 mV\r\nch> ");
       i.PushExpectation("sweep\r\n", "sweep\r\n800000000 1200000000 450\r\nch> ");
+      i.PushExpectation("sweeptime\r\n", "sweeptime\r\nusage: sweeptime 0.03..60\r\n1.5s\r\nch> ");
       
       TinySAControl control = new TinySAControl(i);
       await control.Open();
@@ -34,6 +35,9 @@ namespace LibTinySA.Tests
       Assert.AreEqual(800000000, control.SweepStart);
       Assert.AreEqual(1200000000, control.SweepStop);
       Assert.AreEqual(450, control.SweepPoints);
+      Assert.AreEqual(0.03f, control.MinSweepTime);
+      Assert.AreEqual(60, control.MaxSweepTime);
+      Assert.AreEqual(1.5, control.SweepTime);
       i.AssertNoCommands();
 
       // test commands
@@ -55,6 +59,8 @@ namespace LibTinySA.Tests
       i.PushExpectation("sweep 900000000 1500000000 290\r\n", "sweep 900000000 1500000000 290\r\nch> ");
       i.PushExpectation("sweep\r\n", "sweep\r\n900000000 1400000000 290\r\nch> ");
       i.PushExpectation("marker\r\n", "marker\r\n0 0 819000000 -100\r\n1 0 829000000 -110\r\n2 0 835000000 -150\r\nch> ");
+      i.PushExpectation("sweeptime 2.5\r\n", "sweeptime 2.5\r\nch> ");
+      i.PushExpectation("sweeptime\r\n", "sweeptime\r\nusage: sweeptime 0.03..60\r\n2s\r\nch> ");
 
       await control.LoadSlot(0);
       await control.SaveSlot(2);
@@ -91,6 +97,9 @@ namespace LibTinySA.Tests
       Assert.AreEqual(829000000, markers[1].Frequency);
       Assert.AreEqual(-150, markers[2].Power);
       Assert.AreEqual(835000000, markers[2].Frequency);
+
+      await control.SetSweepTime(2.5f);
+      Assert.AreEqual(2, control.SweepTime);
 
       i.AssertNoCommands();
     }
