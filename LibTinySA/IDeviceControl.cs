@@ -138,6 +138,22 @@ namespace LibTinySA
     ushort SweepPoints { get; }
 
     /// <summary>
+    /// Gets the minimum sweep time, seconds.
+    /// </summary>
+    float MinSweepTime { get; }
+
+    /// <summary>
+    /// Gets the maximum sweep time, seconds.
+    /// </summary>
+    float MaxSweepTime { get; }
+
+    /// <summary>
+    /// Gets the current sweep time, seconds.
+    /// </summary>
+    /// <seealso cref="SetSweepTime"/>
+    float SweepTime { get; }
+
+    /// <summary>
     /// Sets the sweep values for automatic scanning.
     /// </summary>
     /// <param name="start">Start frequency, Hz.</param>
@@ -212,5 +228,13 @@ namespace LibTinySA
     /// </summary>
     /// <returns>Task which completes when the value is get.</returns>
     Task<int> GetBaudRate();
+
+    /// <summary>
+    /// Sets the sweep time value.
+    /// </summary>
+    /// <param name="value">Sweep time value to set, seconds.</param>
+    /// <returns>Task which completes when the value is set.</returns>
+    /// <remarks>Consider checking <see cref="TinySAControl.SweepTime"/> after setting as the device may set different value than provided.</remarks>
+    Task SetSweepTime(float value);
   }
 }
