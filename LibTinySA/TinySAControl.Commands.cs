@@ -457,7 +457,7 @@ namespace LibTinySA
     /// <param name="points">Points count.</param>
     /// <returns>Task which completes when the operation completes.</returns>
     /// <remarks>Using this pauses the automatic scanning if any. <see cref="ScanningProgress"/> notifications will not appear.</remarks>
-    public async Task<ScanPoint[]> Scan(ulong start, ulong stop, ushort points)
+    public async Task<ScanResult> Scan(ulong start, ulong stop, ushort points)
     {
       ushort maxPoints = (ushort)(IsUltra ? 450 : 290);
       if (points > maxPoints)
@@ -467,7 +467,7 @@ namespace LibTinySA
 
       string[] lines = content.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
 
-      ScanPoint[] result = new ScanPoint[lines.Length];
+      ScanSample[] result = new ScanSample[lines.Length];
       for (int i = 0; i < lines.Length; i++)
       {
         string line = lines[i];
@@ -477,11 +477,11 @@ namespace LibTinySA
         ulong freq = ulong.Parse(values[0]);
         double power = values[1].IndexOf(':') != -1 ? -10d : double.Parse(values[1], CultureInfo.InvariantCulture);
 
-        result[i] = new ScanPoint(freq, power);
+        result[i] = new ScanSample(freq, power);
       }
 
       Status = TinySAStatus.Paused;
-      return result;
+      return new ScanResult(result);
     }
   }
 

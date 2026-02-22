@@ -214,7 +214,7 @@ namespace LibTinySA
     /// <param name="points">Points count.</param>
     /// <returns>Task which completes when the operation completes.</returns>
     /// <remarks>Using this pauses the automatic scanning if any. <see cref="TinySAControl.ScanningProgress"/> notifications will not appear.</remarks>
-    Task<ScanPoint[]> Scan(ulong start, ulong stop, ushort points);
+    Task<ScanResult> Scan(ulong start, ulong stop, ushort points);
 
     /// <summary>
     /// Enables or disables autorefresh - automatic dumps of screen during scanning.
